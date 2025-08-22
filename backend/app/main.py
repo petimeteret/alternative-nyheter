@@ -112,12 +112,6 @@ def list_articles(
     q: str | None = None,
 ):
     stmt = select(Article)
-    
-    # Default to last 24 hours if no date filters specified
-    if not date_from and not date_to:
-        twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
-        stmt = stmt.where(Article.published_at >= twenty_four_hours_ago)
-    
     if source:
         stmt = stmt.where(Article.source_domain == source)
     if sources:
@@ -181,16 +175,41 @@ async def manual_refresh(request: Request, db: Session = Depends(get_db)):
         import threading
         
         def run_fetch():
-            fetch_and_store(db)
+            result = fetch_and_store(db)
+            logger.info(f"Manual refresh completed: {result}")
         
         # Start fetch in background thread
         thread = threading.Thread(target=run_fetch)
         thread.start()
         
-        return {"status": "refresh_started", "message": "Oppdatering startet i bakgrunnen"}
+        # Also return current article count for debugging
+        total_articles = db.scalar(select(func.count(Article.id)))
+        
+        return {
+            "status": "refresh_started", 
+            "message": f"Oppdatering startet i bakgrunnen. Nåværende artikler: {total_articles}"
+        }
     except Exception as e:
         logger.error("Error starting refresh", exc_info=e)
         return {"status": "error", "message": "Kunne ikke starte oppdatering"}
+
+@app.get("/api/debug")
+async def debug_articles(db: Session = Depends(get_db)):
+    """Debug endpoint to see article stats"""
+    total = db.scalar(select(func.count(Article.id)))
+    recent = db.scalar(
+        select(func.count(Article.id))
+        .where(Article.published_at >= datetime.utcnow() - timedelta(hours=24))
+    )
+    oldest = db.scalar(select(func.min(Article.published_at)))
+    newest = db.scalar(select(func.max(Article.published_at)))
+    
+    return {
+        "total_articles": total,
+        "last_24h": recent,
+        "oldest_article": oldest.isoformat() if oldest else None,
+        "newest_article": newest.isoformat() if newest else None
+    }
 
 # Mount static files LAST (after all API routes)
 import os
