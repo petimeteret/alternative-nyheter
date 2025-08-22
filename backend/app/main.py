@@ -46,11 +46,6 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
-# Mount static files for single-container deployment
-import os
-if os.path.exists("static"):
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
-
 # Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -190,3 +185,8 @@ async def manual_refresh(request: Request, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error("Error starting refresh", exc_info=e)
         return {"status": "error", "message": "Kunne ikke starte oppdatering"}
+
+# Mount static files LAST (after all API routes)
+import os
+if os.path.exists("static"):
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")

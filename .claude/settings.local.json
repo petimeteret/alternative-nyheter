@@ -29,7 +29,8 @@
       "Bash(\"C:\\Program Files\\GitHub CLI\\gh.exe\" auth status)",
       "Bash(\"C:\\Program Files\\GitHub CLI\\gh.exe\" auth login --web)",
       "Bash(\"C:\\Program Files\\GitHub CLI\\gh.exe\" repo sync)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebFetch(domain:alternative-nyheter.onrender.com)"
     ],
     "deny": [],
     "ask": []
