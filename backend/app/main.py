@@ -211,6 +211,17 @@ async def debug_articles(db: Session = Depends(get_db)):
         "newest_article": newest.isoformat() if newest else None
     }
 
+@app.post("/api/test-fetch")
+async def test_fetch(db: Session = Depends(get_db)):
+    """Test fetch process with detailed logging"""
+    try:
+        result = fetch_and_store(db)
+        logger.info(f"Test fetch result: {result}")
+        return {"status": "completed", "result": result}
+    except Exception as e:
+        logger.error(f"Test fetch failed: {e}", exc_info=e)
+        return {"status": "error", "error": str(e)}
+
 # Mount static files LAST (after all API routes)
 import os
 if os.path.exists("static"):
