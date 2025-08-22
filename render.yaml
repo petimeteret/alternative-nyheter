@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: alternative-nyheter
+    env: docker
+    dockerfilePath: ./Dockerfile.railway
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ENV
+        value: prod
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: REDIS_URL
+        sync: false
+    healthCheckPath: /health
+
+databases:
+  - name: alternative-nyheter-db
+    databaseName: news_db
+    user: news_user
+    plan: free

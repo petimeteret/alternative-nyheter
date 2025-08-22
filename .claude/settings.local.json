@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose:*)",
+      "Bash(claude mcp add dockerhub:*)",
+      "Bash(claude mcp:*)",
+      "Bash(docker image rm:*)",
+      "Bash(docker container:*)",
+      "Bash(docker image prune:*)",
+      "Bash(for i in {1..5})",
+      "Bash(do echo \"Request $i:\")",
+      "Bash(done)",
+      "Bash(docker system:*)",
+      "Bash(docker stats:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(ipconfig)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
