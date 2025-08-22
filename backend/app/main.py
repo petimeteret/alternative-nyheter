@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func, desc, distinct
-from datetime import datetime
+from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 import structlog
 import traceback
@@ -112,6 +112,12 @@ def list_articles(
     q: str | None = None,
 ):
     stmt = select(Article)
+    
+    # Default to last hour if no date filters specified
+    if not date_from and not date_to:
+        one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+        stmt = stmt.where(Article.published_at >= one_hour_ago)
+    
     if source:
         stmt = stmt.where(Article.source_domain == source)
     if sources:
