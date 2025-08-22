@@ -112,6 +112,12 @@ def list_articles(
     q: str | None = None,
 ):
     stmt = select(Article)
+    
+    # Default to last 24 hours if no date filters specified
+    if not date_from and not date_to:
+        twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
+        stmt = stmt.where(Article.published_at >= twenty_four_hours_ago)
+    
     if source:
         stmt = stmt.where(Article.source_domain == source)
     if sources:
