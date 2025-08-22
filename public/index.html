@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alternative Nyheter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .category-badge { @apply inline-block px-2 py-1 text-xs font-medium rounded-full; }
+    .cat-helse { @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200; }
+    .cat-politikk { @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200; }
+    .cat-økonomi { @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200; }
+    .cat-krig { @apply bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200; }
+    .cat-klima { @apply bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200; }
+    .cat-teknologi { @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200; }
+    .cat-kultur { @apply bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200; }
+    .cat-medier { @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200; }
+    .cat-generelt { @apply bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200; }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+
+<!-- Header -->
+<header class="gradient-bg shadow-lg sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center">
+        <i class="fas fa-newspaper text-white text-2xl mr-3"></i>
+        <h1 class="text-xl font-bold text-white">Alternative Nyheter</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="darkToggle" class="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors">
+          <i class="fas fa-moon text-white"></i>
+        </button>
+        <button id="refreshBtn" class="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors">
+          <i class="fas fa-sync-alt text-white"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Filters -->
+<div class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      
+      <!-- Search -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-search text-gray-400"></i>
+        </div>
+        <input id="searchInput" type="text" placeholder="Søk i artikler..." 
+               class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors">
+      </div>
+
+      <!-- Category Filter -->
+      <div class="relative">
+        <select id="categorySelect" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors">
+          <option value="">Alle kategorier</option>
+        </select>
+      </div>
+
+      <!-- Source Filter -->
+      <div class="relative">
+        <select id="sourceSelect" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors">
+          <option value="">Alle kilder</option>
+        </select>
+      </div>
+
+      <!-- Language Filter -->
+      <div class="relative">
+        <select id="languageSelect" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors">
+          <option value="">Alle språk</option>
+          <option value="no">Norsk</option>
+          <option value="en">Engelsk</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="bg-indigo-50 dark:bg-gray-800 border-b dark:border-gray-700">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+    <div class="flex items-center justify-between text-sm">
+      <div class="flex items-center space-x-4">
+        <span id="totalArticles" class="text-gray-600 dark:text-gray-400">
+          <i class="fas fa-newspaper mr-1"></i>Laster artikler...
+        </span>
+        <span id="refreshStatus" class="text-indigo-600 dark:text-indigo-400"></span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="text-gray-500 dark:text-gray-400">Oppdatert:</span>
+        <span id="lastUpdate" class="text-gray-600 dark:text-gray-300 font-medium">--</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Loading State -->
+  <div id="loadingState" class="hidden text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">Laster artikler...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden text-center py-12">
+    <i class="fas fa-newspaper text-gray-400 text-6xl mb-4"></i>
+    <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Ingen artikler funnet</h3>
+    <p class="text-gray-600 dark:text-gray-400 mb-6">Klikk på oppdater-knappen for å hente nye artikler.</p>
+    <button onclick="refreshArticles()" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+      <i class="fas fa-sync-alt mr-2"></i>Oppdater artikler
+    </button>
+  </div>
+
+  <!-- Article Grid -->
+  <div id="articleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Articles will be inserted here -->
+  </div>
+
+  <!-- Pagination -->
+  <div id="pagination" class="hidden flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <span class="text-sm text-gray-700 dark:text-gray-300">
+        Viser side <span id="currentPage">1</span>
+      </span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button id="prevBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        <i class="fas fa-chevron-left mr-1"></i>Forrige
+      </button>
+      <button id="nextBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        Neste<i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+// Use nginx proxy - API calls go through the same origin
+const API_BASE = location.origin;
+
+let currentPage = 1;
+let pageSize = 12;
+let totalArticles = 0;
+let categories = [];
+let sources = [];
+
+// Initialize the app
+document.addEventListener('DOMContentLoaded', async function() {
+  console.log('App initializing...');
+  console.log('API_BASE:', API_BASE);
+  
+  setupEventListeners();
+  loadTheme();
+  
+  // Test API connection first
+  try {
+    const testResponse = await fetch(`${API_BASE}/api/articles?page=1&page_size=1`);
+    console.log('API test response:', testResponse.status);
+    if (testResponse.ok) {
+      const testData = await testResponse.json();
+      console.log('API working, total articles:', testData.total);
+    }
+  } catch (error) {
+    console.error('API connection failed:', error);
+  }
+  
+  await loadFilters();
+  await loadArticles();
+  updateLastUpdate();
+});
+
+function setupEventListeners() {
+  // Dark mode toggle
+  document.getElementById('darkToggle').addEventListener('click', toggleDarkMode);
+  
+  // Refresh button
+  document.getElementById('refreshBtn').addEventListener('click', refreshArticles);
+  
+  // Search
+  document.getElementById('searchInput').addEventListener('input', debounce(handleSearch, 500));
+  
+  // Filters
+  document.getElementById('categorySelect').addEventListener('change', handleFilterChange);
+  document.getElementById('sourceSelect').addEventListener('change', handleFilterChange);
+  document.getElementById('languageSelect').addEventListener('change', handleFilterChange);
+  
+  // Pagination
+  document.getElementById('prevBtn').addEventListener('click', previousPage);
+  document.getElementById('nextBtn').addEventListener('click', nextPage);
+}
+
+function loadTheme() {
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.documentElement.classList.add('dark');
+    updateDarkModeIcon(true);
+  }
+}
+
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  localStorage.setItem('darkMode', isDark);
+  updateDarkModeIcon(isDark);
+}
+
+function updateDarkModeIcon(isDark) {
+  const icon = document.querySelector('#darkToggle i');
+  icon.className = isDark ? 'fas fa-sun text-white' : 'fas fa-moon text-white';
+}
+
+async function loadFilters() {
+  try {
+    console.log('Loading filters...');
+    const [categoriesRes, sourcesRes] = await Promise.all([
+      fetch(`${API_BASE}/api/categories`),
+      fetch(`${API_BASE}/api/sources`)
+    ]);
+    
+    console.log('Categories response:', categoriesRes.status);
+    console.log('Sources response:', sourcesRes.status);
+    
+    if (categoriesRes.ok && sourcesRes.ok) {
+      const categoriesData = await categoriesRes.json();
+      const sourcesData = await sourcesRes.json();
+      
+      categories = categoriesData.categories || [];
+      sources = sourcesData.sources || [];
+      
+      console.log('Categories loaded:', categories);
+      console.log('Sources loaded:', sources);
+      
+      populateFilters();
+    }
+  } catch (error) {
+    console.log('Error loading filters:', error);
+  }
+}
+
+function populateFilters() {
+  console.log('Populating filters...');
+  
+  // Populate categories
+  const categorySelect = document.getElementById('categorySelect');
+  console.log('Category select element:', categorySelect);
+  console.log('Categories to populate:', categories);
+  
+  // Clear existing options except first (Alle kategorier)
+  while (categorySelect.children.length > 1) {
+    categorySelect.removeChild(categorySelect.lastChild);
+  }
+  
+  categories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = capitalizeFirst(category);
+    categorySelect.appendChild(option);
+    console.log('Added category:', category);
+  });
+  
+  // Populate sources
+  const sourceSelect = document.getElementById('sourceSelect');
+  console.log('Source select element:', sourceSelect);
+  console.log('Sources to populate:', sources);
+  
+  // Clear existing options except first (Alle kilder)
+  while (sourceSelect.children.length > 1) {
+    sourceSelect.removeChild(sourceSelect.lastChild);
+  }
+  
+  sources.forEach(source => {
+    const option = document.createElement('option');
+    option.value = source;
+    option.textContent = source;
+    sourceSelect.appendChild(option);
+  });
+  
+  console.log('Filters populated successfully');
+}
+
+function handleFilterChange() {
+  currentPage = 1;
+  loadArticles();
+}
+
+function handleSearch() {
+  currentPage = 1;
+  loadArticles();
+}
+
+async function loadArticles() {
+  showLoading(true);
+  
+  try {
+    const url = new URL(`${API_BASE}/api/articles`);
+    url.searchParams.set('page', currentPage);
+    url.searchParams.set('page_size', pageSize);
+    
+    const category = document.getElementById('categorySelect').value;
+    const source = document.getElementById('sourceSelect').value;
+    const language = document.getElementById('languageSelect').value;
+    const search = document.getElementById('searchInput').value;
+    
+    if (category) url.searchParams.set('category', category);
+    if (source) url.searchParams.set('source', source);
+    if (language) url.searchParams.set('language', language);
+    if (search) url.searchParams.set('q', search);
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    totalArticles = data.total || 0;
+    renderArticles(data.items || []);
+    updatePagination(data);
+    updateStats();
+    
+  } catch (error) {
+    console.error('Error loading articles:', error);
+    showError('Kunne ikke laste artikler. Prøv igjen senere.');
+  } finally {
+    showLoading(false);
+  }
+}
+
+function renderArticles(articles) {
+  const grid = document.getElementById('articleGrid');
+  const emptyState = document.getElementById('emptyState');
+  const pagination = document.getElementById('pagination');
+  
+  if (articles.length === 0) {
+    grid.style.display = 'none';
+    emptyState.style.display = 'block';
+    pagination.style.display = 'none';
+    return;
+  }
+  
+  grid.style.display = 'grid';
+  emptyState.style.display = 'none';
+  pagination.style.display = 'flex';
+  
+  grid.innerHTML = articles.map(article => createArticleCard(article)).join('');
+}
+
+function createArticleCard(article) {
+  const publishedDate = article.published_at ? new Date(article.published_at) : null;
+  const timeAgo = publishedDate ? formatTimeAgo(publishedDate) : '';
+  const category = article.theme || 'generelt';
+  
+  return `
+    <article class="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 overflow-hidden border dark:border-gray-700">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-3">
+          <span class="category-badge cat-${category}">${capitalizeFirst(category)}</span>
+          <span class="text-xs text-gray-500 dark:text-gray-400">${timeAgo}</span>
+        </div>
+        
+        <h3 class="text-lg font-semibold mb-3 line-clamp-2 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <a href="${article.article_url}" target="_blank" rel="noopener">${stripHtml(article.title)}</a>
+        </h3>
+        
+        <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-4">
+          ${stripHtml(article.summary || '')}
+        </p>
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+            <i class="fas fa-external-link-alt mr-1"></i>
+            <a href="${article.source_url}" target="_blank" rel="noopener" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              ${article.source_name}
+            </a>
+          </div>
+          
+          <a href="${article.article_url}" target="_blank" rel="noopener" 
+             class="inline-flex items-center px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors">
+            Les mer <i class="fas fa-arrow-right ml-1"></i>
+          </a>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function updatePagination(data) {
+  document.getElementById('currentPage').textContent = data.page || 1;
+  
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  
+  prevBtn.disabled = (data.page || 1) <= 1;
+  nextBtn.disabled = (data.page || 1) * (data.page_size || pageSize) >= (data.total || 0);
+}
+
+function updateStats() {
+  const totalEl = document.getElementById('totalArticles');
+  totalEl.innerHTML = `<i class="fas fa-newspaper mr-1"></i>${totalArticles.toLocaleString()} artikler`;
+}
+
+function previousPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    loadArticles();
+  }
+}
+
+function nextPage() {
+  currentPage++;
+  loadArticles();
+}
+
+async function refreshArticles() {
+  const btn = document.getElementById('refreshBtn');
+  const icon = btn.querySelector('i');
+  const status = document.getElementById('refreshStatus');
+  
+  icon.classList.add('animate-spin');
+  status.textContent = 'Oppdaterer...';
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/refresh`, { method: 'POST' });
+    if (response.ok) {
+      const result = await response.json();
+      if (result.status === 'refresh_started') {
+        status.textContent = result.message;
+        // Reload articles after a few seconds to get new content
+        setTimeout(async () => {
+          await loadFilters();
+          await loadArticles();
+          updateLastUpdate();
+          status.textContent = 'Oppdatering fullført';
+          setTimeout(() => {
+            status.textContent = '';
+          }, 3000);
+        }, 5000);
+      } else if (result.saved !== undefined) {
+        status.textContent = `Lagret ${result.saved} nye artikler`;
+        await loadFilters();
+        await loadArticles();
+        updateLastUpdate();
+        setTimeout(() => {
+          status.textContent = '';
+        }, 5000);
+      }
+    } else {
+      status.textContent = 'Feil ved oppdatering';
+    }
+  } catch (error) {
+    console.error('Error refreshing articles:', error);
+    status.textContent = 'Feil ved oppdatering';
+  } finally {
+    icon.classList.remove('animate-spin');
+  }
+}
+
+function showLoading(show) {
+  const loadingState = document.getElementById('loadingState');
+  const articleGrid = document.getElementById('articleGrid');
+  const emptyState = document.getElementById('emptyState');
+  
+  if (show) {
+    loadingState.style.display = 'block';
+    articleGrid.style.display = 'none';
+    emptyState.style.display = 'none';
+  } else {
+    loadingState.style.display = 'none';
+  }
+}
+
+function showError(message) {
+  const grid = document.getElementById('articleGrid');
+  grid.innerHTML = `
+    <div class="col-span-full text-center py-12">
+      <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Oops!</h3>
+      <p class="text-gray-600 dark:text-gray-400">${message}</p>
+    </div>
+  `;
+}
+
+function updateLastUpdate() {
+  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('no');
+}
+
+// Utility functions
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+function capitalizeFirst(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function stripHtml(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent || div.innerText || '';
+}
+
+function formatTimeAgo(date) {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  
+  if (diffMins < 1) return 'Nå nettopp';
+  if (diffMins < 60) return `${diffMins} min siden`;
+  
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} t siden`;
+  
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays} d siden`;
+  
+  return date.toLocaleDateString('no');
+}
+</script>
+
+</body>
+</html>

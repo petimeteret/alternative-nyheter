@@ -19,6 +19,10 @@ COPY allowed_domains.json blocked_domains.json ./
 COPY frontend/index.html ./static/
 COPY frontend/nginx.conf ./
 
+# Copy and setup start script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 # Environment variables for production
 ENV ENV=prod
 ENV DATABASE_URL=${DATABASE_URL}
@@ -32,6 +36,4 @@ USER appuser
 # Expose port (Railway will provide $PORT)
 EXPOSE 8000
 
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
 CMD ["/start.sh"]
