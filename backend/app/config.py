@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     REDIS_URL: Optional[str] = None
     
     # Application specific
-    FETCH_INTERVAL_MIN: int = 12
+    FETCH_INTERVAL_MIN: int = 5
     MAX_ARTICLES_PER_FETCH: int = 1000
     USER_AGENT: str = "NewsAggregator/1.0 (+https://alternative-nyheter.no)"
     
